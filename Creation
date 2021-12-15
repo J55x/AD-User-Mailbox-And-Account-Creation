@@ -1,0 +1,73 @@
+# Establish Session
+Set-ExecutionPolicy RemoteSigned
+$UserCredential = Get-Credential
+$Session = New-PSSession -ConfigurationName -ConnectionUri -Authentication  -Credential $UserCredential 
+<# -ConfigurationName -ConnectionUri -Authentication must be filled depending on your configuration #>
+Import-PSSession $Session -DisableNameChecking
+
+# Account Creation Variables
+$Name = Read-Host 'Enter Full Name'
+$Firstname = Read-Host 'Enter First Name'
+$Lastname = Read-Host 'Enter Lastname'
+$Password = Read-Host 'Enter Temp Password' -AsSecureString
+$Username = Read-Host 'Enter Username'
+$Department = Read-Host 'Enter OU'  <# OU must be entered as a path e.g. domain.local/ #>
+$Upn = Read-Host 'Enter UPN'
+    <# Switch for UPN value can be used if you have different UPNs
+		switch ($Upn)
+{
+			Ex1 {$Upn = '@example.com'}
+
+} 
+#>
+$RemoteEmail = $Username+'@mail.onmicrosoft.com'
+$Email = $Username+$Upn
+
+
+# Mailbox Creation
+New-RemoteMailbox -Name $Name -UserPrincipalName $Email -RemoteRoutingAddress $RemoteEmail -Password $Password -FirstName $Firstname -LastName $Lastname -Alias $Username -ResetPasswordOnNextLogon $true -OnPremisesOrganizationalUnit $Department 
+
+# Pause between mailbox creation and adding users to groups
+
+[System.Windows.MessageBox]::Show('User mailbox and account have been created. Please wait 10 sec to begin group addition')
+start-sleep -Seconds 10
+
+<#User's account and mailbox have now been created. The following is used to add a user into groups by location and department#>
+
+# User group addition
+$User = Read-Host 'Enter username'
+
+# User Department
+$Dg = Read-Host 'Enter Department Name'
+# Check switch list for spelling
+
+# Default groups for all users
+$Def = ()
+    foreach($group in $def){
+			Add-ADGroupMember -Identity $group -Members $User}
+
+# Location for User group
+$Location = Read-Host 'Enter User's Office Location'
+
+
+# Switch for Locations
+switch ($Location)
+{
+	MainCampus { $Location = @()
+			foreach($group in $Location){
+			Add-ADGroupMember -Identity $group -Members $User}
+		}
+
+}
+
+
+# Switch for Department groups
+switch ($Dg)
+{
+	test { $Dg = @()
+			foreach($group in $Dg){
+			Add-ADGroupMember -Identity $group -Members $User}
+		}
+	
+}
+
